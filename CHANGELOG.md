@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复删除打卡 API 的 TypeScript 错误
 - Vercel 构建时 Prisma Client 问题
 
-## [1.0.0] - 2024-03-04
+## [1.0.0] - 2026-03-04
 
 ### Added
 - 用户认证系统（注册、登录、登出）
