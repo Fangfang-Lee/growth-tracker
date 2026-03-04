@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Infrastructure
+- 迁移 Neon 数据库到 N.Virginia 区域，降低与 Vercel 部署区域的网络延迟
+
 ## [1.1.0] - 2026-03-04
 
 ### Added
