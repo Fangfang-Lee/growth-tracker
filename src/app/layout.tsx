@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import Link from 'next/link'
 import './globals.css'
 import { Providers } from './providers'
 
@@ -19,6 +20,16 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className={inter.className}>
         <Providers>{children}</Providers>
+        <footer className="py-6 text-center text-sm text-muted-foreground border-t mt-auto">
+          <Link
+            href="https://github.com/Fangfang-Lee/growth-tracker"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
+            GitHub
+          </Link>
+        </footer>
       </body>
     </html>
   )
