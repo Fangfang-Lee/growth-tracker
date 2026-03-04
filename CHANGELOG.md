@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- README.md 文档引用和资源链接
+- CHANGELOG.md 更新日志文档
+- CLAUDE.md 版本发布约定
+
+### Changed
+- 更新技术栈说明（Neon + Session Cookie）
+
+### Dependencies
+- 移除未使用的 Supabase 依赖
+
+### Performance
+- 添加数据库索引优化查询性能
+- 使用 Prisma $transaction 优化串行查询
+- 使用 createManyAndReturn 批量创建
+- 使用 Promise.all 并行查询
+- 前端 stats 页面并行请求 API
+
 ## [1.0.0] - 2024-03-04
 
 ### Added

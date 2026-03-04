@@ -273,6 +273,11 @@ npm run test:watch     # 监听模式
 3. **先设计后开发**，参照 PRD 和 TECH 文档
 4. **组件要职责单一**，复杂逻辑抽离到 hooks
 5. **提交前检查代码**，确保通过 lint
+6. **每次改动都需要更新版本并记录到 CHANGELOG.md**：
+   - 按照 [Keep a Changelog](https://keepachangelog.com/) 格式
+   - 在 `[Unreleased]` 下添加变更内容
+   - 提交时使用合适的 commit type (feat/fix/docs/refactor 等)
+   - 推送后 Vercel 会自动部署新版本
 
 ---
 
