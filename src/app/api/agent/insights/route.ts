@@ -13,28 +13,28 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get user plans with recent logs for insights
-    const plans = await prisma.recurringPlan.findMany({
-      where: { userId: session },
-    })
-
-    // Get recent activity data for insights
-    const recentLogs = await prisma.log.findMany({
-      where: {
-        userId: session,
-        createdAt: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
-        },
-      },
-      include: {
-        instance: {
-          include: {
-            plan: true,
+    // 并行查询计划和最近日志（从日志中已包含计划数据）
+    const [plans, recentLogs] = await Promise.all([
+      prisma.recurringPlan.findMany({
+        where: { userId: session },
+      }),
+      prisma.log.findMany({
+        where: {
+          userId: session,
+          createdAt: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+        include: {
+          instance: {
+            include: {
+              plan: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ])
 
     // Calculate stats per plan
     const planStats = new Map<string, { count: number; days: Set<number> }>()

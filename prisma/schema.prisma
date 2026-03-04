@@ -46,6 +46,7 @@ model RecurringPlan {
   weeklyInstances WeeklyInstance[]
 
   @@unique([userId, name])
+  @@index([userId, isActive])
 }
 
 model WeeklyInstance {
@@ -67,6 +68,7 @@ model WeeklyInstance {
   logs  Log[]
 
   @@unique([planId, weekStart])
+  @@index([userId, weekStart])
 }
 
 model Log {
@@ -81,6 +83,8 @@ model Log {
 
   instance WeeklyInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model UserHabit {
@@ -110,4 +114,6 @@ model Notification {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
 }

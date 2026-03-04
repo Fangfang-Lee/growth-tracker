@@ -58,16 +58,20 @@ export default function StatsPage() {
 
   async function fetchStats() {
     try {
-      // Fetch summary
-      const summaryRes = await fetch('/api/stats/summary')
-      const summaryData = await summaryRes.json()
+      // 并行请求 summary 和 trends
+      const [summaryRes, trendsRes] = await Promise.all([
+        fetch('/api/stats/summary'),
+        fetch('/api/stats/trend?weeks=8'),
+      ])
+
+      const [summaryData, trendsData] = await Promise.all([
+        summaryRes.json(),
+        trendsRes.json(),
+      ])
+
       if (summaryData.data) {
         setSummary(summaryData.data)
       }
-
-      // Fetch trends
-      const trendsRes = await fetch('/api/stats/trend?weeks=8')
-      const trendsData = await trendsRes.json()
       if (trendsData.data) {
         setTrends(trendsData.data)
       }

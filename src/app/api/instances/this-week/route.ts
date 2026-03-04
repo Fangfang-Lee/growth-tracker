@@ -17,46 +17,48 @@ export async function GET(request: NextRequest) {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
     const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 })
 
-    // Get all active plans
-    const plans = await prisma.recurringPlan.findMany({
-      where: { userId: session, isActive: true },
-    })
-
-    // Get this week's instances
-    const instances = await prisma.weeklyInstance.findMany({
-      where: {
-        userId: session,
-        weekStart,
-      },
-      include: {
-        plan: true,
-        logs: {
-          orderBy: { completedAt: 'desc' },
+    // 并行获取活跃计划和本周实例
+    const [plans, instances] = await Promise.all([
+      prisma.recurringPlan.findMany({
+        where: { userId: session, isActive: true },
+      }),
+      prisma.weeklyInstance.findMany({
+        where: { userId: session, weekStart },
+        include: {
+          plan: true,
+          logs: { orderBy: { completedAt: 'desc' } },
         },
-      },
-    })
+      }),
+    ])
 
-    // Create missing instances
-    for (const plan of plans) {
-      const exists = instances.find((i) => i.planId === plan.id)
-      if (!exists) {
-        const newInstance = await prisma.weeklyInstance.create({
-          data: {
-            planId: plan.id,
-            userId: session,
-            weekStart,
-            weekEnd,
-            targetCount: plan.targetCount,
-            currentCount: 0,
-            currentProgress: 0,
-            status: 'pending',
+    // 找出缺失的实例
+    const existingPlanIds = new Set(instances.map((i) => i.planId))
+    const missingPlans = plans.filter((p) => !existingPlanIds.has(p.id))
+
+    // 批量创建缺失的实例
+    if (missingPlans.length > 0) {
+      const newInstances = await prisma.weeklyInstance.createManyAndReturn({
+        data: missingPlans.map((plan) => ({
+          planId: plan.id,
+          userId: session,
+          weekStart,
+          weekEnd,
+          targetCount: plan.targetCount,
+          currentCount: 0,
+          currentProgress: 0,
+          status: 'pending',
+        })),
+      })
+
+      // 获取新创建实例的完整数据
+      if (newInstances.length > 0) {
+        const newFullInstances = await prisma.weeklyInstance.findMany({
+          where: {
+            id: { in: newInstances.map((i) => i.id) },
           },
-          include: {
-            plan: true,
-            logs: true,
-          },
+          include: { plan: true, logs: true },
         })
-        instances.push(newInstance)
+        instances.push(...newFullInstances)
       }
     }
 

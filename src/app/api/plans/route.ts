@@ -74,57 +74,67 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check for duplicate plan name
-    const existingPlan = await prisma.recurringPlan.findFirst({
-      where: { userId: session, name },
+    // 使用事务确保原子性
+    const plan = await prisma.$transaction(async (tx) => {
+      // Check for duplicate plan name
+      const existingPlan = await tx.recurringPlan.findFirst({
+        where: { userId: session, name },
+      })
+
+      if (existingPlan) {
+        throw new Error('PLAN_EXISTS')
+      }
+
+      // Create plan
+      const newPlan = await tx.recurringPlan.create({
+        data: {
+          userId: session,
+          name,
+          icon: icon || '📌',
+          color: color || '#3B82F6',
+          targetType: targetType || 'count',
+          targetCount: targetCount || 1,
+          targetProgress: targetProgress || 100,
+          frequencyType: frequencyType || 'weekly',
+          frequencyDays: frequencyDays || null,
+          startDate: new Date(startDate),
+          endDate: endDate ? new Date(endDate) : null,
+          reminderEnabled: reminderEnabled || false,
+          reminderMinutes: reminderMinutes || 15,
+        },
+      })
+
+      // Generate this week's instance
+      const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
+      const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 })
+
+      await tx.weeklyInstance.create({
+        data: {
+          planId: newPlan.id,
+          userId: session,
+          weekStart,
+          weekEnd,
+          targetCount: newPlan.targetCount,
+          currentCount: 0,
+          currentProgress: 0,
+          status: 'pending',
+        },
+      })
+
+      return newPlan
     })
 
-    if (existingPlan) {
+    return NextResponse.json({ data: plan })
+  } catch (error) {
+    console.error('Create plan error:', error)
+
+    if (error instanceof Error && error.message === 'PLAN_EXISTS') {
       return NextResponse.json(
         { error: { message: '计划名称已存在', code: 'PLAN_EXISTS' } },
         { status: 400 }
       )
     }
 
-    // Create plan
-    const plan = await prisma.recurringPlan.create({
-      data: {
-        userId: session,
-        name,
-        icon: icon || '📌',
-        color: color || '#3B82F6',
-        targetType: targetType || 'count',
-        targetCount: targetCount || 1,
-        targetProgress: targetProgress || 100,
-        frequencyType: frequencyType || 'weekly',
-        frequencyDays: frequencyDays || null,
-        startDate: new Date(startDate),
-        endDate: endDate ? new Date(endDate) : null,
-        reminderEnabled: reminderEnabled || false,
-        reminderMinutes: reminderMinutes || 15,
-      },
-    })
-
-    // Generate this week's instance
-    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
-    const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 })
-
-    await prisma.weeklyInstance.create({
-      data: {
-        planId: plan.id,
-        userId: session,
-        weekStart,
-        weekEnd,
-        targetCount: plan.targetCount,
-        currentCount: 0,
-        currentProgress: 0,
-        status: 'pending',
-      },
-    })
-
-    return NextResponse.json({ data: plan })
-  } catch (error) {
-    console.error('Create plan error:', error)
     return NextResponse.json(
       { error: { message: '服务器错误', code: 'SERVER_ERROR' } },
       { status: 500 }
