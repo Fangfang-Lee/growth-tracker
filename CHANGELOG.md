@@ -10,8 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - 支持删除打卡记录功能，删除后自动回退相关数据（次数/进度/状态）
 - 打卡记录旁边添加删除按钮（悬停时显示）
-
-### Changed
 - README.md 文档引用和资源链接
 - CHANGELOG.md 更新日志文档
 - CLAUDE.md 版本发布约定
@@ -43,11 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - 使用 Neon 云端 PostgreSQL 替代 Supabase
-- 优化数据库查询性能
 
 ### Fixed
 - Vercel 构建时 Prisma Client 问题
-- API 响应速度优化
-
-### Dependencies
-- 移除未使用的 Supabase 依赖
