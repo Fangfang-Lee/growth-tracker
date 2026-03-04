@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '@/components/ui'
-import { ArrowLeft, Check, Plus, Minus } from 'lucide-react'
+import { ArrowLeft, Check, Plus, Minus, Trash2 } from 'lucide-react'
 import { format, startOfWeek, endOfWeek } from 'date-fns'
 
 interface Instance {
@@ -92,6 +92,22 @@ export default function ThisWeekPage() {
       }
     } catch (error) {
       console.error('Failed to update progress:', error)
+    }
+  }
+
+  async function handleDeleteLog(logId: string) {
+    if (!confirm('确定要删除这条打卡记录吗？')) return
+
+    try {
+      const res = await fetch(`/api/logs/${logId}`, {
+        method: 'DELETE',
+      })
+
+      if (res.ok) {
+        fetchInstances()
+      }
+    } catch (error) {
+      console.error('Failed to delete log:', error)
     }
   }
 
@@ -236,11 +252,19 @@ export default function ThisWeekPage() {
                     <div className="mt-4 pt-4 border-t">
                       <p className="text-sm text-muted-foreground mb-2">打卡记录</p>
                       <div className="space-y-1">
-                        {instance.logs.slice(0, 3).map((log) => (
-                          <p key={log.id} className="text-sm">
-                            {format(new Date(log.completedAt), 'MM/dd HH:mm')}
-                            {log.note && ` - ${log.note}`}
-                          </p>
+                        {instance.logs.slice(0, 5).map((log) => (
+                          <div key={log.id} className="flex items-center justify-between text-sm group">
+                            <span>
+                              {format(new Date(log.completedAt), 'MM/dd HH:mm')}
+                              {log.note && ` - ${log.note}`}
+                            </span>
+                            <button
+                              onClick={() => handleDeleteLog(log.id)}
+                              className="text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         ))}
                       </div>
                     </div>
