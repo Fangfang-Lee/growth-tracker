@@ -14,9 +14,9 @@
 |------|------|
 | 前端 | Next.js 14 (App Router), React, TypeScript |
 | 样式 | Tailwind CSS |
-| 数据库 | PostgreSQL (Docker 本地 / Supabase 云端) |
+| 数据库 | PostgreSQL (Docker 本地 / Neon 云端) |
 | ORM | Prisma |
-| 认证 | Supabase Auth |
+| 认证 | Session Cookie + bcrypt |
 | AI | Minimax API |
 | 状态 | TanStack Query + React Context |
 | 表单 | React Hook Form + Zod |
@@ -34,10 +34,8 @@
 # 本地数据库 (Docker)
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/growth_tracker"
 
-# Supabase (开发时可留空)
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+# 云端数据库 (Neon) - 生产环境使用
+# DATABASE_URL="postgresql://neondb_owner:xxx@ep-xxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
 
 # Minimax
 MINIMAX_API_KEY=
@@ -127,10 +125,17 @@ src/
 
 ### 5.1 开发环境
 
-- 使用 Docker 运行本地 PostgreSQL
+- **本地开发**: 使用 Docker 运行 PostgreSQL
+- **生产环境**: 使用 [Neon](https://neon.tech) 云端 PostgreSQL
 - 修改 `DATABASE_URL` 切换数据库
 
-### 5.2 Prisma 操作
+### 5.2 Neon 云端数据库
+
+1. 注册 [Neon](https://neon.tech) 账号
+2. 创建项目，获取连接字符串
+3. 在 Vercel 环境变量中添加 `DATABASE_URL`
+
+### 5.3 Prisma 操作
 
 ```bash
 # 生成 Prisma Client
@@ -268,6 +273,35 @@ npm run test:watch     # 监听模式
 3. **先设计后开发**，参照 PRD 和 TECH 文档
 4. **组件要职责单一**，复杂逻辑抽离到 hooks
 5. **提交前检查代码**，确保通过 lint
+
+---
+
+## 11. 依赖说明
+
+### 生产依赖
+
+| 类别 | 依赖 | 用途 |
+|------|------|------|
+| 框架 | next, react, react-dom | Next.js 框架 |
+| 数据库 | @prisma/client | Prisma ORM 客户端 |
+| 认证 | bcryptjs | 密码哈希 |
+| 状态 | @tanstack/react-query | 服务端状态管理 |
+| 表单 | react-hook-form, @hookform/resolvers | 表单处理 |
+| 验证 | zod | 数据验证 |
+| UI | tailwind-merge, clsx | 类名处理 |
+| UI | lucide-react | 图标库 |
+| UI | recharts | 图表库 |
+| 工具 | date-fns | 日期处理 |
+
+### 开发依赖
+
+| 依赖 | 用途 |
+|------|------|
+| prisma | ORM 工具 |
+| typescript | TypeScript |
+| tailwindcss, autoprefixer, postcss | CSS 工具 |
+| eslint, eslint-config-next | 代码检查 |
+| prettier | 代码格式化 |
 
 ---
 
