@@ -16,10 +16,18 @@
 |------|------|
 | 前端 | Next.js 14 (App Router), React, TypeScript |
 | 样式 | Tailwind CSS |
-| 数据库 | PostgreSQL (Prisma ORM) |
-| 认证 | Session-based Auth |
+| 数据库 | PostgreSQL (Neon) + Prisma ORM |
+| 认证 | Session Cookie + bcrypt |
 | AI | Minimax API |
 | 图表 | Recharts |
+| 部署 | Vercel |
+
+## 文档
+
+- [📖 项目指南](./CLAUDE.md) - 开发规范、代码规范、目录结构
+- [📋 产品需求文档](./PRD.md) - 功能需求、用户故事
+- [⚙️ 技术设计文档](./TECH.md) - 架构设计、数据库设计
+- [📝 更新日志](./CHANGELOG.md) - 版本变更记录
 
 ## 快速开始
 
@@ -105,6 +113,40 @@ vercel deploy
 # 使用 Docker Compose
 docker-compose up -d
 ```
+
+## 常用命令
+
+```bash
+# 开发
+npm run dev              # 启动开发服务器 (http://localhost:3002)
+
+# 构建
+npm run build            # 构建生产版本
+npm run start            # 启动生产服务器
+
+# 代码质量
+npm run lint            # 代码检查
+npm run format          # 代码格式化
+
+# 数据库
+npx prisma studio       # 打开数据库管理
+npx prisma db push      # 同步数据库结构
+
+# 测试
+npm run test            # 运行测试
+```
+
+## 相关资源
+
+### 技术文档
+- [Next.js 文档](https://nextjs.org/docs)
+- [Prisma 文档](https://www.prisma.io/docs)
+- [Tailwind CSS 文档](https://tailwindcss.com/docs)
+- [Recharts 文档](https://recharts.org/)
+
+### 数据库
+- [Neon - Serverless PostgreSQL](https://neon.tech)
+- [PostgreSQL 文档](https://www.postgresql.org/docs/)
 
 ## 许可证
 
