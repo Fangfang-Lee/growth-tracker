@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-04
+
 ### Added
 - 支持删除打卡记录功能，删除后自动回退相关数据（次数/进度/状态）
 - 打卡记录旁边添加删除按钮（悬停时显示）
@@ -27,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 使用 Promise.all 并行查询
 - 前端 stats 页面并行请求 API
 
+### Fixed
+- 修复删除打卡 API 的 TypeScript 错误
+- Vercel 构建时 Prisma Client 问题
+
 ## [1.0.0] - 2024-03-04
 
 ### Added
@@ -41,6 +47,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - 使用 Neon 云端 PostgreSQL 替代 Supabase
-
-### Fixed
-- Vercel 构建时 Prisma Client 问题
