@@ -17,50 +17,37 @@ export async function GET(request: NextRequest) {
     const now = new Date()
     const weekStart = startOfWeek(now, { weekStartsOn: 1 })
     const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+    const todayStart = new Date(now)
+    todayStart.setHours(0, 0, 0, 0)
 
-    // Get this week's instances
-    const instances = await prisma.weeklyInstance.findMany({
-      where: {
-        userId: session,
-        weekStart: {
-          gte: weekStart,
-          lte: weekEnd,
+    // 并行执行所有查询
+    const [instances, todayLogs, allTimeCompleted, totalLogs] = await Promise.all([
+      prisma.weeklyInstance.findMany({
+        where: {
+          userId: session,
+          weekStart: { gte: weekStart, lte: weekEnd },
         },
-      },
-      include: {
-        plan: true,
-      },
-    })
+        include: { plan: true },
+      }),
+      prisma.log.findMany({
+        where: {
+          userId: session,
+          createdAt: { gte: todayStart },
+        },
+      }),
+      prisma.weeklyInstance.count({
+        where: { userId: session, status: 'completed' },
+      }),
+      prisma.log.count({
+        where: { userId: session },
+      }),
+    ])
 
     // Calculate summary
     const total = instances.length
     const completed = instances.filter((i) => i.status === 'completed').length
     const inProgress = instances.filter((i) => i.status === 'in_progress').length
     const pending = total - completed - inProgress
-
-    // Get today's logs
-    const todayLogs = await prisma.log.findMany({
-      where: {
-        userId: session,
-        createdAt: {
-          gte: new Date(now.setHours(0, 0, 0, 0)),
-        },
-      },
-    })
-
-    // Get all-time stats
-    const allTimeCompleted = await prisma.weeklyInstance.count({
-      where: {
-        userId: session,
-        status: 'completed',
-      },
-    })
-
-    const totalLogs = await prisma.log.count({
-      where: {
-        userId: session,
-      },
-    })
 
     return NextResponse.json({
       data: {
