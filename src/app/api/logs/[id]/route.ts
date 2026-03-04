@@ -23,7 +23,7 @@ export async function DELETE(
       // 查找打卡记录
       const log = await tx.log.findFirst({
         where: { id: logId, userId: session },
-        include: { instance: true },
+        include: { instance: { include: { plan: true } } },
       })
 
       if (!log) {
