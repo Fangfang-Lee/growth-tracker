@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext'
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '@/components/ui'
 import { ArrowLeft, Check, Plus, Minus, Trash2 } from 'lucide-react'
 import { format, startOfWeek, endOfWeek } from 'date-fns'
+import { CheckInDialog } from '@/components/features/CheckInDialog'
 
 interface Instance {
   id: string
@@ -36,6 +37,10 @@ export default function ThisWeekPage() {
   const [instances, setInstances] = useState<Instance[]>([])
   const [loading, setLoading] = useState(true)
   const [progressInput, setProgressInput] = useState<Record<string, number>>({})
+  const [checkInDialog, setCheckInDialog] = useState<{ open: boolean; instance: Instance | null }>({
+    open: false,
+    instance: null,
+  })
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -63,14 +68,19 @@ export default function ThisWeekPage() {
     }
   }
 
-  async function handleCheckIn(instance: Instance) {
+  function handleCheckIn(instance: Instance) {
+    setCheckInDialog({ open: true, instance })
+  }
+
+  async function handleCheckInConfirm(completedAt: string) {
+    const instance = checkInDialog.instance
+    if (!instance) return
     try {
       const res = await fetch(`/api/instances/${instance.id}/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ countValue: 1 }),
+        body: JSON.stringify({ countValue: 1, completedAt }),
       })
-
       if (res.ok) {
         fetchInstances()
       }
@@ -284,6 +294,12 @@ export default function ThisWeekPage() {
           )}
         </div>
       </div>
+      <CheckInDialog
+        isOpen={checkInDialog.open}
+        onClose={() => setCheckInDialog({ open: false, instance: null })}
+        onConfirm={handleCheckInConfirm}
+        planName={checkInDialog.instance?.plan.name ?? ''}
+      />
     </div>
   )
 }
