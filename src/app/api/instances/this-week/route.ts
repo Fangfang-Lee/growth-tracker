@@ -14,6 +14,12 @@ export async function GET(request: NextRequest) {
 
     const weekOffsetParam = request.nextUrl.searchParams.get('weekOffset')
     const weekOffset = weekOffsetParam ? parseInt(weekOffsetParam, 10) : 0
+    if (isNaN(weekOffset)) {
+      return NextResponse.json(
+        { error: { message: '无效的 weekOffset 参数', code: 'INVALID_PARAM' } },
+        { status: 400 }
+      )
+    }
     const isCurrentWeek = weekOffset === 0
 
     const baseDate = addWeeks(new Date(), weekOffset)
