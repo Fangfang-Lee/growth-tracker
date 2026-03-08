@@ -18,6 +18,16 @@ export async function POST(
 
     const { countValue, progress, note, completedAt } = await request.json()
 
+    if (completedAt !== undefined) {
+      const parsed = new Date(completedAt)
+      if (isNaN(parsed.getTime())) {
+        return NextResponse.json(
+          { error: { message: '无效的打卡时间格式', code: 'INVALID_COMPLETED_AT' } },
+          { status: 400 }
+        )
+      }
+    }
+
     // 使用事务确保原子性
     const result = await prisma.$transaction(async (tx) => {
       // Check instance exists and belongs to user
