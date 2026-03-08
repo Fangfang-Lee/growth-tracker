@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- 打卡时弹出确认弹窗，支持指定打卡日期和时间，默认显示当前时间
+
 ### Infrastructure
 - 迁移 Neon 数据库到 N.Virginia 区域，降低与 Vercel 部署区域的网络延迟
 
