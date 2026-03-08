@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '@/components/ui'
 import { ArrowLeft, Check, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { format, startOfWeek, endOfWeek, addWeeks } from 'date-fns'
-import { useSearchParams } from 'next/navigation'
 import { CheckInDialog } from '@/components/features/CheckInDialog'
 
 interface Instance {
@@ -32,11 +31,12 @@ interface Instance {
   }>
 }
 
-export default function ThisWeekPage() {
+function ThisWeekContent() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const weekOffset = parseInt(searchParams.get('weekOffset') ?? '0', 10)
+  const rawOffset = parseInt(searchParams.get('weekOffset') ?? '0', 10)
+  const weekOffset = isNaN(rawOffset) ? 0 : rawOffset
   const [instances, setInstances] = useState<Instance[]>([])
   const [loading, setLoading] = useState(true)
   const [pendingProgress, setPendingProgress] = useState<Record<string, number>>({})
@@ -312,10 +312,14 @@ export default function ThisWeekPage() {
 
           {instances.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">本周还没有计划</p>
-              <Link href="/plans/new">
-                <Button>创建计划</Button>
-              </Link>
+              <p className="text-muted-foreground mb-4">
+                {weekOffset === 0 ? '本周还没有计划' : '该周没有打卡记录'}
+              </p>
+              {weekOffset === 0 && (
+                <Link href="/plans/new">
+                  <Button>创建计划</Button>
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -342,5 +346,13 @@ export default function ThisWeekPage() {
         planName={progressDialog.instance?.plan.name ?? ''}
       />
     </div>
+  )
+}
+
+export default function ThisWeekPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>加载中...</p></div>}>
+      <ThisWeekContent />
+    </Suspense>
   )
 }
