@@ -36,7 +36,12 @@ export default function ThisWeekPage() {
   const router = useRouter()
   const [instances, setInstances] = useState<Instance[]>([])
   const [loading, setLoading] = useState(true)
-  const [progressInput, setProgressInput] = useState<Record<string, number>>({})
+  const [pendingProgress, setPendingProgress] = useState<Record<string, number>>({})
+  const [progressDialog, setProgressDialog] = useState<{
+    open: boolean
+    instance: Instance | null
+    progress: number
+  }>({ open: false, instance: null, progress: 0 })
   const [checkInDialog, setCheckInDialog] = useState<{ open: boolean; instance: Instance | null }>({
     open: false,
     instance: null,
@@ -90,15 +95,18 @@ export default function ThisWeekPage() {
     }
   }
 
-  async function handleProgressUpdate(instance: Instance, progress: number) {
+  async function handleProgressConfirm(completedAt: string) {
+    const { instance, progress } = progressDialog
+    if (!instance) return
+    const instanceId = instance.id
     try {
-      const res = await fetch(`/api/instances/${instance.id}/log`, {
+      const res = await fetch(`/api/instances/${instanceId}/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ progress }),
+        body: JSON.stringify({ progress, completedAt }),
       })
-
       if (res.ok) {
+        setProgressDialog({ open: false, instance: null, progress: 0 })
         fetchInstances()
       }
     } catch (error) {
