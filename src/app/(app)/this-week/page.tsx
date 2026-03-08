@@ -224,12 +224,10 @@ export default function ThisWeekPage() {
                         step={1}
                         value={pendingProgress[instance.id] ?? instance.currentProgress}
                         disabled={instance.currentProgress >= 100}
-                        onChange={(e) =>
-                          setPendingProgress({
-                            ...pendingProgress,
-                            [instance.id]: Number(e.target.value),
-                          })
-                        }
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          setPendingProgress((prev) => ({ ...prev, [instance.id]: v }))
+                        }}
                         onMouseUp={() => {
                           const value = pendingProgress[instance.id] ?? instance.currentProgress
                           if (value !== instance.currentProgress) {
