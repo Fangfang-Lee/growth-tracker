@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '@/components/ui'
-import { ArrowLeft, Check, Trash2 } from 'lucide-react'
-import { format, startOfWeek, endOfWeek } from 'date-fns'
+import { ArrowLeft, Check, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { format, startOfWeek, endOfWeek, addWeeks } from 'date-fns'
+import { useSearchParams } from 'next/navigation'
 import { CheckInDialog } from '@/components/features/CheckInDialog'
 
 interface Instance {
@@ -34,6 +35,8 @@ interface Instance {
 export default function ThisWeekPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const weekOffset = parseInt(searchParams.get('weekOffset') ?? '0', 10)
   const [instances, setInstances] = useState<Instance[]>([])
   const [loading, setLoading] = useState(true)
   const [pendingProgress, setPendingProgress] = useState<Record<string, number>>({})
@@ -57,11 +60,11 @@ export default function ThisWeekPage() {
     if (user) {
       fetchInstances()
     }
-  }, [user])
+  }, [user, weekOffset])
 
   async function fetchInstances() {
     try {
-      const res = await fetch('/api/instances/this-week')
+      const res = await fetch(`/api/instances/this-week?weekOffset=${weekOffset}`)
       const data = await res.json()
       if (data.data) {
         setInstances(data.data)
@@ -135,8 +138,9 @@ export default function ThisWeekPage() {
     }
   }
 
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
-  const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 })
+  const baseDate = addWeeks(new Date(), weekOffset)
+  const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 })
 
   if (authLoading || loading) {
     return (
@@ -158,11 +162,30 @@ export default function ThisWeekPage() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold">本周打卡</h1>
-            <p className="text-muted-foreground">
-              {format(weekStart, 'M月d日')} - {format(weekEnd, 'M月d日')}
-            </p>
+          <div className="flex items-center gap-2 flex-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push(`/this-week?weekOffset=${weekOffset - 1}`)}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex-1 text-center">
+              <h1 className="text-2xl font-bold">
+                {weekOffset === 0 ? '本周打卡' : '历史补打'}
+              </h1>
+              <p className="text-muted-foreground">
+                {format(weekStart, 'M月d日')} - {format(weekEnd, 'M月d日')}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push(`/this-week?weekOffset=${weekOffset + 1}`)}
+              disabled={weekOffset >= 0}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </Button>
           </div>
         </div>
 
