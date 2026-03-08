@@ -75,8 +75,9 @@ export default function ThisWeekPage() {
   async function handleCheckInConfirm(completedAt: string) {
     const instance = checkInDialog.instance
     if (!instance) return
+    const instanceId = instance.id
     try {
-      const res = await fetch(`/api/instances/${instance.id}/log`, {
+      const res = await fetch(`/api/instances/${instanceId}/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ countValue: 1, completedAt }),
