@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui'
+import { Button, Input, Label } from '@/components/ui'
 
 interface CheckInDialogProps {
   isOpen: boolean
@@ -35,16 +35,16 @@ export function CheckInDialog({ isOpen, onClose, onConfirm, planName }: CheckInD
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-lg p-6 w-80 space-y-4">
+      <div className="relative bg-background rounded-xl shadow-lg p-6 w-80 space-y-4">
         <h2 className="text-lg font-semibold">打卡确认</h2>
         <p className="text-sm text-muted-foreground">{planName}</p>
         <div className="space-y-2">
-          <label className="text-sm font-medium">打卡时间</label>
-          <input
+          <Label htmlFor="checkin-datetime">打卡时间</Label>
+          <Input
+            id="checkin-datetime"
             type="datetime-local"
             value={datetime}
             onChange={(e) => setDatetime(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div className="flex gap-2 pt-2">
