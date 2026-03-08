@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '@/components/ui'
-import { ArrowLeft, Check, Plus, Minus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Trash2 } from 'lucide-react'
 import { format, startOfWeek, endOfWeek } from 'date-fns'
 import { CheckInDialog } from '@/components/features/CheckInDialog'
 
@@ -107,6 +107,11 @@ export default function ThisWeekPage() {
       })
       if (res.ok) {
         setProgressDialog({ open: false, instance: null, progress: 0 })
+        setPendingProgress((prev) => {
+          const next = { ...prev }
+          delete next[instanceId]
+          return next
+        })
         fetchInstances()
       }
     } catch (error) {
@@ -211,47 +216,40 @@ export default function ThisWeekPage() {
                   </div>
 
                   {isProgress ? (
-                    <div>
-                      <div className="flex items-center gap-4">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            handleProgressUpdate(
-                              instance,
-                              Math.max(0, instance.currentProgress - 10)
-                            )
-                          }
-                          disabled={instance.currentProgress >= 100}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <div className="flex-1">
-                          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all"
-                              style={{
-                                width: `${instance.currentProgress}%`,
-                                backgroundColor: instance.plan.color,
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            handleProgressUpdate(
-                              instance,
-                              Math.min(100, instance.currentProgress + 10)
-                            )
-                          }
-                          disabled={instance.currentProgress >= 100}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                        <span className="w-12 text-center">{instance.currentProgress}%</span>
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={pendingProgress[instance.id] ?? instance.currentProgress}
+                        disabled={instance.currentProgress >= 100}
+                        onChange={(e) =>
+                          setPendingProgress({
+                            ...pendingProgress,
+                            [instance.id]: Number(e.target.value),
+                          })
+                        }
+                        onMouseUp={() =>
+                          setProgressDialog({
+                            open: true,
+                            instance,
+                            progress: pendingProgress[instance.id] ?? instance.currentProgress,
+                          })
+                        }
+                        onTouchEnd={() =>
+                          setProgressDialog({
+                            open: true,
+                            instance,
+                            progress: pendingProgress[instance.id] ?? instance.currentProgress,
+                          })
+                        }
+                        className="flex-1 h-2 cursor-pointer"
+                        style={{ accentColor: instance.plan.color }}
+                      />
+                      <span className="w-12 text-center text-sm">
+                        {pendingProgress[instance.id] ?? instance.currentProgress}%
+                      </span>
                     </div>
                   ) : (
                     <div className="flex gap-2">
@@ -308,6 +306,18 @@ export default function ThisWeekPage() {
         onClose={() => setCheckInDialog({ open: false, instance: null })}
         onConfirm={handleCheckInConfirm}
         planName={checkInDialog.instance?.plan.name ?? ''}
+      />
+      <CheckInDialog
+        isOpen={progressDialog.open}
+        onClose={() => {
+          setPendingProgress({
+            ...pendingProgress,
+            [progressDialog.instance?.id ?? '']: progressDialog.instance?.currentProgress ?? 0,
+          })
+          setProgressDialog({ open: false, instance: null, progress: 0 })
+        }}
+        onConfirm={handleProgressConfirm}
+        planName={progressDialog.instance?.plan.name ?? ''}
       />
     </div>
   )
