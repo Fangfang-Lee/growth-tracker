@@ -16,7 +16,7 @@ export async function POST(
       )
     }
 
-    const { countValue, progress, note } = await request.json()
+    const { countValue, progress, note, completedAt } = await request.json()
 
     // 使用事务确保原子性
     const result = await prisma.$transaction(async (tx) => {
@@ -40,6 +40,7 @@ export async function POST(
           countValue: countValue || 1,
           progress: isProgress ? progress : null,
           note: note || null,
+          ...(completedAt ? { completedAt: new Date(completedAt) } : {}),
         },
       })
 
