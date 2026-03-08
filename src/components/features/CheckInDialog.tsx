@@ -28,8 +28,8 @@ export function CheckInDialog({ isOpen, onClose, onConfirm, planName }: CheckInD
 
   function handleConfirm() {
     if (!datetime) return
-    onConfirm(datetime)
-    onClose()
+    onConfirm(new Date(datetime).toISOString())
+    // Remove onClose() from here - parent handles closing
   }
 
   return (

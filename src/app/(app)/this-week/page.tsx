@@ -73,9 +73,8 @@ export default function ThisWeekPage() {
   }
 
   async function handleCheckInConfirm(completedAt: string) {
-    const instance = checkInDialog.instance
-    if (!instance) return
-    const instanceId = instance.id
+    const instanceId = checkInDialog.instance?.id
+    if (!instanceId) return
     try {
       const res = await fetch(`/api/instances/${instanceId}/log`, {
         method: 'POST',
@@ -83,6 +82,7 @@ export default function ThisWeekPage() {
         body: JSON.stringify({ countValue: 1, completedAt }),
       })
       if (res.ok) {
+        setCheckInDialog({ open: false, instance: null })
         fetchInstances()
       }
     } catch (error) {
