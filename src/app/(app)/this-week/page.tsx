@@ -230,20 +230,18 @@ export default function ThisWeekPage() {
                             [instance.id]: Number(e.target.value),
                           })
                         }
-                        onMouseUp={() =>
-                          setProgressDialog({
-                            open: true,
-                            instance,
-                            progress: pendingProgress[instance.id] ?? instance.currentProgress,
-                          })
-                        }
-                        onTouchEnd={() =>
-                          setProgressDialog({
-                            open: true,
-                            instance,
-                            progress: pendingProgress[instance.id] ?? instance.currentProgress,
-                          })
-                        }
+                        onMouseUp={() => {
+                          const value = pendingProgress[instance.id] ?? instance.currentProgress
+                          if (value !== instance.currentProgress) {
+                            setProgressDialog({ open: true, instance, progress: value })
+                          }
+                        }}
+                        onTouchEnd={() => {
+                          const value = pendingProgress[instance.id] ?? instance.currentProgress
+                          if (value !== instance.currentProgress) {
+                            setProgressDialog({ open: true, instance, progress: value })
+                          }
+                        }}
                         className="flex-1 h-2 cursor-pointer"
                         style={{ accentColor: instance.plan.color }}
                       />
@@ -310,10 +308,13 @@ export default function ThisWeekPage() {
       <CheckInDialog
         isOpen={progressDialog.open}
         onClose={() => {
-          setPendingProgress({
-            ...pendingProgress,
-            [progressDialog.instance?.id ?? '']: progressDialog.instance?.currentProgress ?? 0,
-          })
+          const inst = progressDialog.instance
+          if (inst) {
+            setPendingProgress((prev) => ({
+              ...prev,
+              [inst.id]: inst.currentProgress,
+            }))
+          }
           setProgressDialog({ open: false, instance: null, progress: 0 })
         }}
         onConfirm={handleProgressConfirm}
