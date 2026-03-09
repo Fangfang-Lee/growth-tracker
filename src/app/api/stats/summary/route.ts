@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       prisma.log.findMany({
         where: {
           userId: session,
-          createdAt: { gte: todayStart },
+          completedAt: { gte: todayStart },
         },
       }),
       prisma.weeklyInstance.count({
